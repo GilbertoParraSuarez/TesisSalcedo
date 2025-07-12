@@ -13,11 +13,13 @@ class ReadingService:
         db_reading = reading.dict()
         db_reading["fecha"] = datetime.utcnow()
         
+        # TODO: Verificar si la planta existe antes de crear la lectura
         # Actualizar última lectura en la planta
-        await self.plants_collection.update_one(
-            {"_id": ObjectId(reading.planta_id)},
-            {"$set": {"ultima_lectura": db_reading["fecha"]}}
-        )
+        if ObjectId.is_valid(reading.planta_id):
+            await self.plants_collection.update_one(
+                {"_id": ObjectId(reading.planta_id)},
+                {"$set": {"ultima_lectura": db_reading["fecha"]}}
+            )
         
         result = await self.readings_collection.insert_one(db_reading)
         created_reading = await self.readings_collection.find_one({"_id": result.inserted_id})
