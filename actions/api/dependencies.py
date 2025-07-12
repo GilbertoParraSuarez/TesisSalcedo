@@ -1,18 +1,18 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from typing import Annotated
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated, Optional
 from jose import JWTError, jwt
-from actions.api.models.models import UserInDB, Role
-from data.db.mongo import users_collection
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from dotenv import load_dotenv
 
+from actions.api.models.models import UserInDB, Role, TokenData
+from actions.api.services.auth_service import AuthService
+
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+auth_service = AuthService()
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     """Obtiene el usuario actual basado en el token JWT"""
@@ -22,38 +22,26 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, auth_service.SECRET_KEY, algorithms=[auth_service.ALGORITHM])
         username: str = payload.get("sub")
-        if username is None:
+        role: str = payload.get("role")
+        if username is None or role is None:
             raise credentials_exception
+        token_data = TokenData(username=username, role=role)
     except JWTError:
         raise credentials_exception
     
-    user = await users_collection.find_one({"username": username})
+    user = await auth_service.get_current_user(token)
     if user is None:
         raise credentials_exception
     
-    return UserInDB(
-        id=str(user["_id"]),
-        username=user["username"],
-        email=user["email"],
-        full_name=user.get("full_name"),
-        second_name=user.get("second_name"),
-        jefe_inmediato=user.get("jefe_inmediato"),
-        cargo=user.get("cargo", ""),
-        unidad=user.get("unidad", ""),
-        fecha_ingreso=user.get("fecha_ingreso", datetime.now()),
-        regimen=user.get("regimen", ""),
-        role=user["role"],
-        hashed_password=user["hashed_password"],
-        disabled=user.get("disabled", True)
-    )
+    return user
 
 async def get_current_active_user(
     current_user: Annotated[UserInDB, Depends(get_current_user)]
 ) -> UserInDB:
     """Verifica que el usuario esté activo"""
-    if current_user.disabled == False:
+    if current_user.disabled:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuario inactivo"
@@ -65,7 +53,7 @@ def require_role(required_role: Role):
     async def role_checker(
         current_user: Annotated[UserInDB, Depends(get_current_active_user)]
     ) -> UserInDB:
-        if current_user.role != required_role:
+        if current_user.role != required_role.value:  # Comparar con el valor del Enum
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Se requieren privilegios de {required_role.value}",
@@ -76,4 +64,29 @@ def require_role(required_role: Role):
 
 # Dependencias específicas para cada rol
 get_current_admin = require_role(Role.ADMIN)
-get_current_boss = require_role(Role.BOSS)
+get_current_researcher = require_role(Role.INVES)
+get_current_farmer = require_role(Role.AGRIC)
+
+async def get_user_from_token(token: str = Depends(oauth2_scheme)) -> Optional[UserInDB]:
+    """Obtiene el usuario desde el token sin lanzar excepciones (para uso interno)"""
+    try:
+        payload = jwt.decode(token, auth_service.SECRET_KEY, algorithms=[auth_service.ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+        return await auth_service.get_current_user(token)
+    except JWTError:
+        return None
+
+def same_user_or_admin(user_id: str):
+    """Verifica que el usuario sea el mismo o un admin"""
+    async def checker(
+        current_user: Annotated[UserInDB, Depends(get_current_active_user)]
+    ) -> UserInDB:
+        if current_user.id != user_id and current_user.role != Role.ADMIN.value:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes permisos para acceder a este recurso"
+            )
+        return current_user
+    return checker

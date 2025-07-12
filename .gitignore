@@ -1,0 +1,22 @@
+# .gitignore
+.env
+venv/
+__pycache__/
+*.pyc
+./node_modules/
+tesissalcedo/
+db/__pycache__/
+
+# Caché de Rasa
+/models/
+/.rasa/
+/nlu_models/
+/.cache/
+*.pickle
+*.dat
+*.prof
+*.db
+*.log
+*.tmp
+*.h5
+*.tar.gz
