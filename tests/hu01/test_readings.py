@@ -10,7 +10,6 @@ client = TestClient(app)
 def test_get_readings_by_plant(mock_get_readings):
     plant_id = "planta123"
 
-    # Crea un objeto LecturaOut simulado
     lectura = LecturaOut(
         id="fakeid123",
         planta_id=plant_id,
@@ -25,7 +24,6 @@ def test_get_readings_by_plant(mock_get_readings):
         notas="Lectura simulada"
     )
 
-    # Simula el retorno del servicio usando model_dump(by_alias=True)
     mock_get_readings.return_value = [lectura]
 
     response = client.get(f"/readings/plant/{plant_id}")
@@ -34,13 +32,11 @@ def test_get_readings_by_plant(mock_get_readings):
     readings = response.json()
     assert isinstance(readings, list)
 
+    # Obtenemos el json esperado usando model_dump(by_alias=True)
+    expected_json = lectura.model_dump(by_alias=True)
+
     for lectura_json in readings:
-        assert "id" in lectura_json
-        assert "planta_id" in lectura_json
-        assert lectura_json["planta_id"] == plant_id
-        assert "humedad" in lectura_json
-        assert "ph" in lectura_json
-        assert "temperatura" in lectura_json
+        assert lectura_json == expected_json
 
 @patch("actions.api.services.lectura_service.ReadingService.create_reading", new_callable=AsyncMock)
 def test_create_reading(mock_create_reading):
@@ -57,7 +53,6 @@ def test_create_reading(mock_create_reading):
         "notas": "Lectura de prueba"
     }
 
-    # Simula la respuesta del servicio con LecturaOut
     lectura_creada = LecturaOut(
         id="fakeid123",
         planta_id=payload["planta_id"],
@@ -78,13 +73,7 @@ def test_create_reading(mock_create_reading):
     assert response.status_code == 200
 
     data = response.json()
-    assert data["id"] == "fakeid123"
-    assert data["planta_id"] == payload["planta_id"]
-    assert data["humedad"] == payload["humedad"]
-    assert data["temperatura"] == payload["temperatura"]
-    assert data["ec"] == payload["ec"]
-    assert data["ph"] == payload["ph"]
-    assert data["nitrogeno"] == payload["nitrogeno"]
-    assert data["fosforo"] == payload["fosforo"]
-    assert data["potasio"] == payload["potasio"]
-    assert data["notas"] == payload["notas"]
+
+    expected_json = lectura_creada.model_dump(by_alias=True)
+
+    assert data == expected_json
