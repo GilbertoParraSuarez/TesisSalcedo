@@ -11,7 +11,7 @@ user_service = UserService()
 
 @router.get("/", response_model=List[UserOut])
 async def list_users(
-    current_user: UserOut = Depends(auth_service.get_current_user)
+    #current_user: UserOut = Depends(auth_service.get_current_user)
 ):
     return await user_service.list_users()
 
@@ -32,14 +32,13 @@ async def get_user(
 async def update_user_data(
     user_id: str,
     user_data: UserUpdate,
-    current_user: UserOut = Depends(auth_service.get_current_user)
+    #current_user: UserOut = Depends(auth_service.get_current_user)
 ):
-    # Solo admins o el propio usuario pueden actualizar
-    if current_user.role != "administradores" and current_user.id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="No tienes permisos para realizar esta acción"
-        )
+    #if current_user.role != "administradores" and current_user.id != user_id:
+    #    raise HTTPException(
+    #        status_code=status.HTTP_403_FORBIDDEN,
+    #        detail="No tienes permisos para realizar esta acción"
+    #    )
     
     updated_user = await user_service.update_user(user_id, user_data)
     if not updated_user:

@@ -14,7 +14,6 @@ class UserBase(BaseModel):
     username: str
     nombre: Optional[str] = None
     apellido: Optional[str] = None
-    plantas_ids: List[str] = Field(default_factory=list)
     creado_en: datetime = Field(default_factory=datetime.utcnow)
 
 class UserCreate(UserBase):
@@ -29,15 +28,21 @@ class UserInDB(UserBase):
     class Config:
         from_attributes = True
 
-class UserOut(UserBase):
+class UserOut(BaseModel):
     id: str
-    role: Role
+    username: str
+    nombre: str
+    apellido: str
+    role: str
+    creado_en: datetime
+    
+    class Config:
+        fields = {'hashed_password': {'exclude': True}}
 
 class UserUpdate(BaseModel):
     nombre: Optional[str] = None
     apellido: Optional[str] = None
     role: Optional[Role] = None
-    plantas_ids: Optional[List[str]] = None
     password: Optional[str] = None
 
 class UserList(BaseModel):
@@ -53,33 +58,8 @@ class TokenData(BaseModel):
     username: Optional[str] = None
     role: Optional[Role] = None
 
-""" MODELOS PARA LA PLANTA """
-class PlantaBase(BaseModel):
-    nombre: str = Field(..., min_length=2, max_length=100)
-    descripcion: Optional[str] = None
-    creado_en: datetime = Field(default_factory=datetime.utcnow)
-
-class PlantaCreate(PlantaBase):
-    pass
-
-class PlantaInDB(PlantaBase):
-    id: str
-    ultima_lectura: Optional[datetime] = None
-
-class PlantaOut(PlantaBase):
-    id: str
-    ultima_lectura: Optional[datetime] = None
-
-class PlantaUpdate(BaseModel):
-    nombre: Optional[str] = None
-    descripcion: Optional[str] = None
-
-class PlantaList(BaseModel):
-    plantas: List[PlantaOut]
-
 """ MODELOS PARA LA LECTURA """
 class LecturaBase(BaseModel):
-    planta_id: str
     humedad: float
     temperatura: float
     ec: float
@@ -91,7 +71,7 @@ class LecturaBase(BaseModel):
     notas: Optional[str] = None
 
 class LecturaCreate(LecturaBase):
-    pass
+        planta_id: Optional[str] = None  # ← Agregado
 
 class LecturaInDB(LecturaBase):
     id: str

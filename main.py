@@ -7,7 +7,6 @@ from typing import Optional, List, Dict
 import os
 from dotenv import load_dotenv
 from data.db.mongo import init_db, ensure_collections, users_collection
-from actions.api.endpoints.planta_router import router as plant_router  # Cambiado a plant_router
 from actions.api.endpoints.lectura_router import router as reading_router  # Cambiado a reading_router
 from actions.api.endpoints.auth_router import router as auth_router
 from actions.api.endpoints.user_router import router as user_router
@@ -39,10 +38,9 @@ app.add_middleware(
 
 # Incluir routers (original, con nombres actualizados)
 app.include_router(auth_router)
-app.include_router(plant_router)  # Antes: messages_router
-app.include_router(reading_router)  # Antes: solicitudes_router
+app.include_router(reading_router)
 app.include_router(user_router)
-app.include_router(websocket_routes.router)  # WebSockets
+app.include_router(websocket_routes.router)
 
 # Eventos de inicio (original)
 @app.on_event("startup")

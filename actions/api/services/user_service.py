@@ -3,6 +3,7 @@ from bson import ObjectId
 from datetime import datetime
 from data.db.mongo import db
 from actions.api.models.models import UserCreate, UserOut, UserUpdate, UserInDB
+from actions.api.services.auth_service import AuthService
 
 class UserService:
     def __init__(self):
@@ -13,12 +14,17 @@ class UserService:
         if existing_user:
             return None
         
-        db_user = user.dict()
-        db_user["hashed_password"] = AuthService().get_password_hash(user.password)
-        db_user["creado_en"] = datetime.utcnow()
+        # Crear diccionario excluyendo la contraseña
+        user_data = user.dict(exclude={"password"})
         
-        result = await self.users_collection.insert_one(db_user)
+        # Añadir solo el hash de la contraseña
+        user_data["hashed_password"] = AuthService().get_password_hash(user.password)
+        user_data["creado_en"] = datetime.utcnow()
+        
+        result = await self.users_collection.insert_one(user_data)
         created_user = await self.users_collection.find_one({"_id": result.inserted_id})
+        
+        # Asegurarse de no devolver el hash en la respuesta
         return UserOut(**created_user, id=str(created_user["_id"]))
 
     async def get_user_by_id(self, user_id: str) -> Optional[UserOut]:

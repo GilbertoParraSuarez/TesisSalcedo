@@ -34,7 +34,6 @@ async def login_for_access_token(
         username=user.username,
         nombre=user.nombre,
         apellido=user.apellido,
-        plantas_ids=user.plantas_ids,
         creado_en=user.creado_en,
         role=user.role
     )
