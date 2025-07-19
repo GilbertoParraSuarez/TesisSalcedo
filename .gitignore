@@ -20,3 +20,4 @@ db/__pycache__/
 *.tmp
 *.h5
 *.tar.gz
+coverage.xml
