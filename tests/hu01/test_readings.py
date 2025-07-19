@@ -3,6 +3,7 @@ from main import app
 from unittest.mock import AsyncMock, patch
 from actions.api.models.models import LecturaOut
 from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 client = TestClient(app)
 
@@ -32,8 +33,7 @@ def test_get_readings_by_plant(mock_get_readings):
     readings = response.json()
     assert isinstance(readings, list)
 
-    # Obtenemos el json esperado usando model_dump(by_alias=True)
-    expected_json = lectura.model_dump(by_alias=True)
+    expected_json = jsonable_encoder(lectura, by_alias=True)
 
     for lectura_json in readings:
         assert lectura_json == expected_json
@@ -74,6 +74,6 @@ def test_create_reading(mock_create_reading):
 
     data = response.json()
 
-    expected_json = lectura_creada.model_dump(by_alias=True)
+    expected_json = jsonable_encoder(lectura_creada, by_alias=True)
 
     assert data == expected_json
