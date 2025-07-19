@@ -20,15 +20,22 @@ def test_get_readings_by_plant():
 
 def test_create_reading():
     payload = {
-        "plant_id": "planta123",
+        "planta_id": "planta123",
         "humedad": 55.5,
+        "temperatura": 22.3,
+        "ec": 1.2,
         "ph": 6.8,
-        "temperatura": 22.3
+        "nitrogeno": 10.0,
+        "fosforo": 5.0,
+        "potasio": 8.0,
+        "fecha": "2025-07-19T21:24:54.401Z",
+        "notas": "Lectura de prueba"
     }
+
     response = client.post("/readings/", json=payload)
     assert response.status_code == 200
     data = response.json()
-    assert data["plant_id"] == payload["plant_id"]
-    assert data["humedad"] == payload["humedad"]
-    assert data["ph"] == payload["ph"]
-    assert data["temperatura"] == payload["temperatura"]
+    
+    # Verifica que los valores retornados sean los mismos
+    for key in payload:
+        assert data[key] == payload[key] or key == "id"  # Ignora 'id' generado
