@@ -44,7 +44,7 @@ app.include_router(websocket_routes.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "API Agrícola funcionando correctamente"}
+    return {"message": "API Agrícola funcionando correctamentee"}
 
 # Eventos de inicio (original)
 @app.on_event("startup")
