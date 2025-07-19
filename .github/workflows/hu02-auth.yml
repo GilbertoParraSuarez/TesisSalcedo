@@ -1,0 +1,53 @@
+name: HU02 - Autenticación y Acceso Seguro
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "tests/hu02/**"
+      - "actions/api/services/auth_service.py"
+      - "actions/api/endpoints/auth_router.py"
+      - ".github/workflows/hu02-auth.yml"
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  auth-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run HU02 Auth Tests
+      env:
+        SECRET_KEY: supersecretkey
+      run: |
+        pytest tests/hu02 --cov=actions --cov-report=xml
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: hu02-auth-coverage
+        path: coverage.xml
