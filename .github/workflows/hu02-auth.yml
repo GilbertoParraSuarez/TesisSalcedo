@@ -1,4 +1,4 @@
-name: HU02 - Autenticación y Acceso Seguro
+name: H.U.02 - Autenticación y Acceso Seguro
 
 on:
   push:
@@ -10,10 +10,15 @@ on:
       - ".github/workflows/hu02-auth.yml"
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  auth-tests:
+  hu02-auth:
     runs-on: ubuntu-latest
+
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     services:
       mongodb:
@@ -27,27 +32,26 @@ jobs:
           --health-retries=5
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout código
+      uses: actions/checkout@v4
 
-    - name: Set up Python
+    - name: Configurar Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
 
-    - name: Install dependencies
+    - name: Instalar dependencias
       run: |
-        pip install --upgrade pip
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run HU02 Auth Tests
-      env:
-        SECRET_KEY: supersecretkey
+    - name: Ejecutar tests H.U.02
       run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu02 --cov=actions --cov-report=xml
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v3
+    - name: Subir reporte de cobertura
+      uses: actions/upload-artifact@v4
       with:
         name: hu02-auth-coverage
         path: coverage.xml
