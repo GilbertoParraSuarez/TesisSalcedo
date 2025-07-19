@@ -13,10 +13,11 @@ jobs:
     env:
       MONGO_URI: ${{ secrets.MONGO_URI }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
     - name: Checkout código
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -33,11 +34,10 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest --cov=. --cov-report=xml
 
-    - name: Analizar con SonarCloud
-      uses: SonarSource/sonarcloud-github-action@master
+    - name: Analizar con SonarCloud (Nueva acción)
+      uses: SonarSource/sonarqube-scan-action@v5.0.0
       with:
-        organization: GilbertoParraSuarez
-        projectKey: GilbertoParraSuarez_TesisSalcedo
-        token: ${{ secrets.SONAR_TOKEN }}
         args: >
+          -Dsonar.projectKey=GilbertoParraSuarez_TesisSalcedo
+          -Dsonar.organization=GilbertoParraSuarez
           -Dsonar.python.coverage.reportPaths=coverage.xml
