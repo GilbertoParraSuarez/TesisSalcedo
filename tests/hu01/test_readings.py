@@ -8,9 +8,10 @@ client = TestClient(app)
 def test_get_readings_by_plant(mock_get_readings):
     plant_id = "planta123"
 
-    # Simula datos retornados por la base de datos
+    # Simula datos retornados por la base de datos incluyendo 'id'
     mock_get_readings.return_value = [
         {
+            "id": "fakeid123",
             "planta_id": plant_id,
             "humedad": 55.5,
             "temperatura": 22.3,
@@ -29,6 +30,8 @@ def test_get_readings_by_plant(mock_get_readings):
     readings = response.json()
     assert isinstance(readings, list)
     for lectura in readings:
+        assert "id" in lectura
+        assert "planta_id" in lectura
         assert "humedad" in lectura
         assert "ph" in lectura
         assert "temperatura" in lectura
@@ -49,7 +52,7 @@ def test_create_reading(mock_create_reading):
         "notas": "Lectura de prueba"
     }
 
-    # Simula la respuesta del servicio
+    # Simula la respuesta del servicio incluyendo 'id'
     mock_create_reading.return_value = {
         **payload,
         "id": "fakeid123"
