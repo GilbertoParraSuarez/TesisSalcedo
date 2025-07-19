@@ -22,4 +22,4 @@ jobs:
       with:
         args: >
           -Dsonar.projectKey=GilbertoParraSuarez_TesisSalcedo
-          -Dsonar.organization=GilbertoParraSuarez
+          -Dsonar.organization=gilbertoparrasuarez

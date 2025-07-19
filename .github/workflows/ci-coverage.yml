@@ -39,5 +39,5 @@ jobs:
       with:
         args: >
           -Dsonar.projectKey=GilbertoParraSuarez_TesisSalcedo
-          -Dsonar.organization=GilbertoParraSuarez
+          -Dsonar.organization=gilbertoparrasuarez
           -Dsonar.python.coverage.reportPaths=coverage.xml
