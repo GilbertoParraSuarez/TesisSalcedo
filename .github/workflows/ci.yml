@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
     - name: Checkout código
       uses: actions/checkout@v2
@@ -26,8 +30,8 @@ jobs:
 
     - name: Ejecutar pruebas con cobertura
       run: |
-            export PYTHONPATH=$PYTHONPATH:$(pwd)
-            pytest --cov=. --cov-report=xml
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        pytest --cov=. --cov-report=xml
 
     - name: Analizar con SonarCloud
       uses: SonarSource/sonarcloud-github-action@master
