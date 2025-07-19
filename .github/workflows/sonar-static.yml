@@ -1,0 +1,25 @@
+name: Análisis Estático SonarCloud
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sonarcloud-static:
+    runs-on: ubuntu-latest
+
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+
+    - name: SonarCloud Scan (solo análisis estático)
+      uses: SonarSource/sonarqube-scan-action@v5.0.0
+      with:
+        args: >
+          -Dsonar.projectKey=GilbertoParraSuarez_TesisSalcedo
+          -Dsonar.organization=GilbertoParraSuarez

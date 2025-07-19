@@ -1,4 +1,4 @@
-name: FastAPI CI + SonarCloud
+name: Tests + Coverage SonarCloud
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  coverage:
     runs-on: ubuntu-latest
 
     env:
@@ -29,12 +29,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar pruebas con cobertura
+    - name: Ejecutar tests y generar cobertura
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest --cov=. --cov-report=xml
 
-    - name: Analizar con SonarCloud (Nueva acción)
+    - name: SonarCloud Scan con Coverage
       uses: SonarSource/sonarqube-scan-action@v5.0.0
       with:
         args: >
