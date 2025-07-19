@@ -26,7 +26,8 @@ jobs:
 
     - name: Ejecutar pruebas con cobertura
       run: |
-        pytest --cov=. --cov-report=xml
+            export PYTHONPATH=$PYTHONPATH:$(pwd)
+            pytest --cov=. --cov-report=xml
 
     - name: Analizar con SonarCloud
       uses: SonarSource/sonarcloud-github-action@master
