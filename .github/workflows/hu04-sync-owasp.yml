@@ -50,14 +50,18 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu04/test_sync_readings.py --cov=actions --cov-report=xml
 
-    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
-      uses: dependency-check/Dependency-Check_Action@v3.1.2
-      with:
-        project: "HU04-Sincronizacion"
-        scanPath: "."
-        format: "HTML,JSON"
-        failOnCVSS: 7.0
-        outputDirectory: reports/hu04-owasp
+    - name: OWASP Dependency-Check via Docker
+      run: |
+        mkdir -p reports/hu04-owasp
+        docker run --rm \
+          -v "$(pwd):/src" \
+          -v "$(pwd)/reports/hu04-owasp:/report" \
+          owasp/dependency-check:latest \
+          --project "HU04-Sincronizacion" \
+          --scan /src \
+          --format "HTML" \
+          --out /report \
+          --failOnCVSS 7.0
 
     - name: Subir reportes de cobertura y seguridad
       uses: actions/upload-artifact@v4

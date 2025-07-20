@@ -10,15 +10,10 @@ on:
       - ".github/workflows/hu04-sync.yml"
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
-  hu04-sync:
+  sync-tests:
     runs-on: ubuntu-latest
-
-    env:
-      MONGO_URI: ${{ secrets.MONGO_URI }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     services:
       mongodb:
@@ -31,9 +26,13 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
     - name: Checkout código
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -51,7 +50,7 @@ jobs:
         pytest tests/hu04/test_sync_readings.py --cov=actions --cov-report=xml
 
     - name: Subir reporte de cobertura
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: hu04-sync-coverage
         path: coverage.xml
