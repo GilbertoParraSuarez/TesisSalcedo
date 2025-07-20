@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  hu01-readings:
+  hu01-readings-owasp:
     runs-on: ubuntu-latest
 
     services:
@@ -45,25 +45,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar tests H.U.01
+    - name: Ejecutar tests H.U.01 - Lecturas de Sensores
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu01/test_readings.py --cov=actions --cov-report=xml
 
-    - name: Crear carpeta de reportes OWASP
-      run: mkdir -p reports/hu01-owasp
-
-    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
+    - name: OWASP Dependency-Check con Docker (Lecturas Sensores)
       run: |
+        mkdir -p reports/hu01-owasp
         docker run --rm \
-          -v "$(pwd):/src" \
-          -v "$(pwd)/reports/hu01-owasp:/report" \
+          --volume $(pwd):/src \
           owasp/dependency-check:latest \
           --project "HU01-LecturasSensores" \
           --scan /src \
-          --format "HTML,JSON" \
+          --format HTML --format JSON \
           --failOnCVSS 11.0 \
-          --out /report
+          --out /src/reports/hu01-owasp
 
     - name: Subir reportes de cobertura y seguridad
       uses: actions/upload-artifact@v4
