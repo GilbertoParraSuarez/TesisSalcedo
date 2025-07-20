@@ -46,7 +46,7 @@ jobs:
         pytest --cov=actions --cov-report=xml
 
     - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
-      uses: dependency-check/Dependency-Check_Action@v4
+      uses: dependency-check/Dependency-Check_Action@v3.1.2
       with:
         project: "TesisSalcedo"
         scanPath: "."
