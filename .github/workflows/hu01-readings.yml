@@ -11,17 +11,6 @@ jobs:
   hu01-readings:
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     env:
       MONGO_URI: ${{ secrets.MONGO_URI }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -40,13 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar tests H.U.01 - Lecturas de Sensores
+    - name: Ejecutar tests H.U.01
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest tests/hu01/test_readings.py --cov=actions --cov-report=xml
-
-    - name: Subir reporte de cobertura
-      uses: actions/upload-artifact@v3
-      with:
-        name: hu01-readings-coverage
-        path: coverage.xml
+        pytest tests/hu01/test_readings.py

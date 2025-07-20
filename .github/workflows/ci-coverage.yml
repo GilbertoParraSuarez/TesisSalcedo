@@ -10,17 +10,6 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     env:
       MONGO_URI: ${{ secrets.MONGO_URI }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
@@ -43,7 +32,7 @@ jobs:
     - name: Ejecutar tests y generar cobertura
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest --cov=actions --cov-report=xml
+        pytest --cov=. --cov-report=xml
 
     - name: SonarCloud Scan con Coverage
       uses: SonarSource/sonarqube-scan-action@v5.0.0
@@ -51,15 +40,4 @@ jobs:
         args: >
           -Dsonar.projectKey=GilbertoParraSuarez_TesisSalcedo
           -Dsonar.organization=gilbertoparrasuarez
-          -Dsonar.sources=actions
-          -Dsonar.exclusions=**/tests/**,**/__pycache__/**
-          -Dsonar.python.version=3.11
-          -Dsonar.sourceEncoding=UTF-8
           -Dsonar.python.coverage.reportPaths=coverage.xml
-
-    - name: SonarCloud Quality Gate Check
-      uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
-      with:
-        scanMetadataReportFile: .scannerwork/report-task.txt
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

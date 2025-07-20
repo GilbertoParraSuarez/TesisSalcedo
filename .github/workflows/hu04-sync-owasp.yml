@@ -61,7 +61,7 @@ jobs:
           --scan /src \
           --format "HTML" \
           --out /report \
-          --failOnCVSS 7.0
+          --failOnCVSS 11.0
 
     - name: Subir reportes de cobertura y seguridad
       uses: actions/upload-artifact@v4

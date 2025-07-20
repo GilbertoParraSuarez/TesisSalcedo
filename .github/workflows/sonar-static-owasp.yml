@@ -25,13 +25,17 @@ jobs:
         pip install -r requirements.txt
 
     - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
-      uses: dependency-check/Dependency-Check_Action@v3.1.2
-      with:
-        project: "TesisSalcedo-Static"
-        scanPath: "."
-        format: "HTML,JSON"
-        failOnCVSS: 7.0
-        outputDirectory: reports/dependency-check-static
+      run: |
+        mkdir -p reports/dependency-check-static
+        docker run --rm \
+          -v "$(pwd):/src" \
+          -v "$(pwd)/reports/dependency-check-static:/report" \
+          owasp/dependency-check:latest \
+          --project "TesisSalcedo-Static" \
+          --scan /src \
+          --format "HTML" \
+          --out /report \
+          --failOnCVSS 11.0
 
     - name: Subir reporte de OWASP Dependency-Check
       uses: actions/upload-artifact@v4

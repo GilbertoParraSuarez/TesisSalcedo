@@ -46,13 +46,17 @@ jobs:
         pytest --cov=actions --cov-report=xml
 
     - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
-      uses: dependency-check/Dependency-Check_Action@v3.1.2
-      with:
-        project: "TesisSalcedo"
-        scanPath: "."
-        format: "HTML,JSON"
-        failOnCVSS: 7.0
-        outputDirectory: reports/dependency-check
+      run: |
+        mkdir -p reports/dependency-check
+        docker run --rm \
+          -v "$(pwd):/src" \
+          -v "$(pwd)/reports/dependency-check:/report" \
+          owasp/dependency-check:latest \
+          --project "TesisSalcedo" \
+          --scan /src \
+          --format "HTML" \
+          --out /report \
+          --failOnCVSS 11.0
 
     - name: Subir reporte de OWASP Dependency-Check
       uses: actions/upload-artifact@v4

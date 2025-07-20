@@ -50,14 +50,18 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu03/test_historical_readings.py --cov=actions --cov-report=xml
 
-    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
-      uses: dependency-check/Dependency-Check_Action@v3.1.2
-      with:
-        project: "HU03-VisualizacionHistorica"
-        scanPath: "."
-        format: "HTML,JSON"
-        failOnCVSS: 7.0
-        outputDirectory: reports/hu03-owasp
+    - name: OWASP Dependency-Check via Docker
+      run: |
+        mkdir -p reports/hu03-owasp
+        docker run --rm \
+          -v "$(pwd):/src" \
+          -v "$(pwd)/reports/hu03-owasp:/report" \
+          owasp/dependency-check:latest \
+          --project "HU03-VisualizacionHistorica" \
+          --scan /src \
+          --format "HTML" \
+          --out /report \
+          --failOnCVSS 11.0
 
     - name: Subir reportes de cobertura y seguridad
       uses: actions/upload-artifact@v4

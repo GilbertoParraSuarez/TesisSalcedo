@@ -10,15 +10,10 @@ on:
       - ".github/workflows/hu03-historical.yml"
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:
 
 jobs:
-  hu03-historical:
+  historical-tests:
     runs-on: ubuntu-latest
-
-    env:
-      MONGO_URI: ${{ secrets.MONGO_URI }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     services:
       mongodb:
@@ -31,9 +26,13 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
     steps:
     - name: Checkout código
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -45,13 +44,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar tests H.U.03 - Visualización de Datos Históricos
+    - name: Ejecutar tests H.U.03 - Datos Históricos
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu03/test_historical_readings.py --cov=actions --cov-report=xml
 
     - name: Subir reporte de cobertura
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: hu03-historical-coverage
         path: coverage.xml
