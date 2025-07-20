@@ -1,8 +1,13 @@
-name: H.U.01 - Gestión de Lecturas de Sensores
+name: H.U.01 - Gestión de Lecturas de Sensores + OWASP
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - "tests/hu01/**"
+      - "actions/api/services/lectura_service.py"
+      - "actions/api/endpoints/lectura_router.py"
+      - ".github/workflows/hu01-readings-owasp.yml"
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -28,7 +33,7 @@ jobs:
 
     steps:
     - name: Checkout código
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configurar Python
       uses: actions/setup-python@v4
@@ -40,13 +45,24 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar tests H.U.01 - Lecturas de Sensores
+    - name: Ejecutar tests H.U.01
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu01/test_readings.py --cov=actions --cov-report=xml
 
-    - name: Subir reporte de cobertura
-      uses: actions/upload-artifact@v3
+    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
+      uses: dependency-check/Dependency-Check_Action@v4
       with:
-        name: hu01-readings-coverage
-        path: coverage.xml
+        project: "HU01-LecturasSensores"
+        scanPath: "."
+        format: "HTML,JSON"
+        failOnCVSS: 7.0
+        outputDirectory: reports/hu01-owasp
+
+    - name: Subir reporte de cobertura y seguridad
+      uses: actions/upload-artifact@v4
+      with:
+        name: hu01-reports
+        path: |
+          coverage.xml
+          reports/hu01-owasp

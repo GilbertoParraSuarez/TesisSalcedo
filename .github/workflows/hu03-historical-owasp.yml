@@ -1,19 +1,19 @@
-name: H.U.04 - Sincronización de Datos
+name: H.U.03 - Visualización de Datos Históricos + OWASP
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - "tests/hu04/**"
+      - "tests/hu03/**"
       - "actions/api/services/lectura_service.py"
       - "actions/api/endpoints/lectura_router.py"
-      - ".github/workflows/hu04-sync.yml"
+      - ".github/workflows/hu03-historical-owasp.yml"
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  hu04-sync:
+  hu03-historical:
     runs-on: ubuntu-latest
 
     env:
@@ -45,13 +45,24 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar tests H.U.04 - Sincronización de Datos
+    - name: Ejecutar tests H.U.03 - Visualización de Datos Históricos
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest tests/hu04/test_sync_readings.py --cov=actions --cov-report=xml
+        pytest tests/hu03/test_historical_readings.py --cov=actions --cov-report=xml
 
-    - name: Subir reporte de cobertura
-      uses: actions/upload-artifact@v3
+    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
+      uses: dependency-check/Dependency-Check_Action@v4
       with:
-        name: hu04-sync-coverage
-        path: coverage.xml
+        project: "HU03-VisualizacionHistorica"
+        scanPath: "."
+        format: "HTML,JSON"
+        failOnCVSS: 7.0
+        outputDirectory: reports/hu03-owasp
+
+    - name: Subir reportes de cobertura y seguridad
+      uses: actions/upload-artifact@v4
+      with:
+        name: hu03-historical-reports
+        path: |
+          coverage.xml
+          reports/hu03-owasp

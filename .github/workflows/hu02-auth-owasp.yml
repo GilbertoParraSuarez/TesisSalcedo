@@ -1,4 +1,4 @@
-name: H.U.02 - Autenticación y Acceso Seguro
+name: H.U.02 - Autenticación y Acceso Seguro + OWASP
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - "tests/hu02/**"
       - "actions/api/services/auth_service.py"
       - "actions/api/endpoints/auth_router.py"
-      - ".github/workflows/hu02-auth.yml"
+      - ".github/workflows/hu02-auth-owasp.yml"
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -50,8 +50,19 @@ jobs:
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest tests/hu02 --cov=actions --cov-report=xml
 
-    - name: Subir reporte de cobertura
-      uses: actions/upload-artifact@v3
+    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
+      uses: dependency-check/Dependency-Check_Action@v4
       with:
-        name: hu02-auth-coverage
-        path: coverage.xml
+        project: "HU02-Autenticacion"
+        scanPath: "."
+        format: "HTML,JSON"
+        failOnCVSS: 7.0
+        outputDirectory: reports/hu02-owasp
+
+    - name: Subir reportes de cobertura y seguridad
+      uses: actions/upload-artifact@v4
+      with:
+        name: hu02-auth-reports
+        path: |
+          coverage.xml
+          reports/hu02-owasp

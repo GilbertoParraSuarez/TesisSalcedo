@@ -1,4 +1,4 @@
-name: Tests + Coverage SonarCloud
+name: Tests + Coverage + OWASP Dependency-Check
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  coverage:
+  coverage-and-security:
     runs-on: ubuntu-latest
 
     services:
@@ -44,6 +44,21 @@ jobs:
       run: |
         export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest --cov=actions --cov-report=xml
+
+    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
+      uses: dependency-check/Dependency-Check_Action@v4
+      with:
+        project: "TesisSalcedo"
+        scanPath: "."
+        format: "HTML,JSON"
+        failOnCVSS: 7.0
+        outputDirectory: reports/dependency-check
+
+    - name: Subir reporte de OWASP Dependency-Check
+      uses: actions/upload-artifact@v4
+      with:
+        name: owasp-dependency-check-report
+        path: reports/dependency-check
 
     - name: SonarCloud Scan con Coverage
       uses: SonarSource/sonarqube-scan-action@v5.0.0

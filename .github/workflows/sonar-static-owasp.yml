@@ -1,4 +1,4 @@
-name: Tests + Coverage SonarCloud
+name: Análisis Estático + OWASP Dependency-Check
 
 on:
   push:
@@ -7,24 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  coverage:
+  sonarcloud-static-owasp:
     runs-on: ubuntu-latest
-
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      MONGO_URI: ${{ secrets.MONGO_URI }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     steps:
     - name: Checkout código
@@ -40,22 +24,33 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ejecutar tests y generar cobertura
-      run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest --cov=actions --cov-report=xml
+    - name: OWASP Dependency-Check - Análisis de Vulnerabilidades
+      uses: dependency-check/Dependency-Check_Action@v4
+      with:
+        project: "TesisSalcedo-Static"
+        scanPath: "."
+        format: "HTML,JSON"
+        failOnCVSS: 7.0
+        outputDirectory: reports/dependency-check-static
 
-    - name: SonarCloud Scan con Coverage
+    - name: Subir reporte de OWASP Dependency-Check
+      uses: actions/upload-artifact@v4
+      with:
+        name: owasp-dependency-check-static-report
+        path: reports/dependency-check-static
+
+    - name: SonarCloud Scan (solo análisis estático)
       uses: SonarSource/sonarqube-scan-action@v5.0.0
       with:
         args: >
           -Dsonar.projectKey=GilbertoParraSuarez_TesisSalcedo
           -Dsonar.organization=gilbertoparrasuarez
           -Dsonar.sources=actions
-          -Dsonar.exclusions=**/tests/**,**/__pycache__/**
+          -Dsonar.language=py
           -Dsonar.python.version=3.11
           -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.python.coverage.reportPaths=coverage.xml
+          -Dsonar.verbose=true
+          -Dsonar.exclusions=**/tests/**,**/__pycache__/**
 
     - name: SonarCloud Quality Gate Check
       uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
