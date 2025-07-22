@@ -36,7 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir routers (original, con nombres actualizados)
+# Incluir routers (original, con nombres actualizados!)
 app.include_router(auth_router)
 app.include_router(reading_router)
 app.include_router(user_router)
