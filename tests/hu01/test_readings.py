@@ -12,7 +12,7 @@ def test_get_readings_by_plant(mock_get_readings):
     plant_id = "planta123"
 
     lectura = LecturaOut(
-        id="fakeid123",
+        id="id01",
         planta_id=plant_id,
         humedad=55.5,
         temperatura=22.3,
@@ -54,7 +54,7 @@ def test_create_reading(mock_create_reading):
     }
 
     lectura_creada = LecturaOut(
-        id="fakeid123",
+        id="id01",
         planta_id=payload["planta_id"],
         humedad=payload["humedad"],
         temperatura=payload["temperatura"],
