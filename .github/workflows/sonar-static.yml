@@ -1,4 +1,4 @@
-name: Análisis Estático SonarCloud
+name: Nuevo Análisis Estático SonarCloud
 
 on:
   push:
