@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 from actions.api.models.models import LecturaOut
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
-from test_factories import create_lectura_out
+from tests.test_factories import create_lectura_out
 
 client = TestClient(app)
 
