@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch
 from actions.api.models.models import LecturaOut
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
+from test_factories import create_lectura_out
 
 client = TestClient(app)
 
@@ -53,19 +54,8 @@ def test_create_reading(mock_create_reading):
         "notas": "Lectura de prueba"
     }
 
-    lectura_creada = LecturaOut(
-        id="id01",
-        planta_id=payload["planta_id"],
-        humedad=payload["humedad"],
-        temperatura=payload["temperatura"],
-        ec=payload["ec"],
-        ph=payload["ph"],
-        nitrogeno=payload["nitrogeno"],
-        fosforo=payload["fosforo"],
-        potasio=payload["potasio"],
-        fecha=datetime.fromisoformat(payload["fecha"].replace("Z", "+00:00")),
-        notas=payload["notas"]
-    )
+    lectura_creada = create_lectura_out(payload, lectura_id="id01")
+
 
     mock_create_reading.return_value = lectura_creada
 
