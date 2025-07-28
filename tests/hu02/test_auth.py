@@ -10,6 +10,7 @@ client = TestClient(app)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "testsecret")
 ALGORITHM = "HS256"
+FAKE_HASHED_PW = os.getenv("TEST_FAKE_HASHED_PW", "fakehashed")
 
 def fake_jwt_token(username, role):
     expire = datetime.utcnow() + timedelta(minutes=30)
@@ -25,7 +26,7 @@ def test_login_success(mock_authenticate):
         apellido="Test",
         creado_en=datetime.utcnow(),
         role="administradores",
-        hashed_password="fakehashed"
+        hashed_password=FAKE_HASHED_PW
     )
 
     mock_authenticate.return_value = user_mock
