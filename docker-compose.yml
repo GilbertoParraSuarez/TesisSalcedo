@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: TesisSalcedo
+    ports:
+      - "5055:5055"  # Usando tu puerto 5055 
+    environment:
+      - MONGODB_URL=mongodb://admin:password_seguro@db:27017/agricultura_db?authSource=admin
+      - APP_ENV=development
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 5055
+    volumes:
+      - ./:/app  # Mapea todo tu proyecto
+    depends_on:
+      - db
+
+  db:
+    image: mongo:6.0
+    container_name: tesissalcedo_mongodb
+    environment:
+      - MONGO_URI=mongodb://admin:password_seguro@db:27017/agricultura_db?authSource=admin
+      - MONGO_DB_NAME=agricultura_db
+      - SECRET_KEY=una_clave_secreta_segura
+
+
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodb_data:
